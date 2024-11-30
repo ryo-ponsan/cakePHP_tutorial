@@ -60,8 +60,14 @@ return function (RouteBuilder $routes): void {
         /*
          * ...and connect the rest of 'Pages' controller's URLs.
          */
-        $builder->connect('/pages/*', 'Pages::display');
-
+        // $builder->connect('/pages/*', 'Pages::display');
+        $builder->connect('/pages/*', ['controller' => 'Pages', 'action' => 'display']);
+        // タグ付けられたアクションのために追加された新しいルート。
+        // 末尾の `*` は、このアクションがパラメーターを渡されることを
+        // CakePHP に伝えます。
+        $builder->scope('/articles', function (RouteBuilder $builder) {
+            $builder->connect('/tagged/*', ['controller' => 'Articles', 'action' => 'tags']);
+        });
         /*
          * Connect catchall routes for all controllers.
          *

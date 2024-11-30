@@ -7,6 +7,11 @@ use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
+// Text クラス
+use Cake\Utility\Text;
+// EventInterface クラス
+use Cake\Event\EventInterface;
+
 
 /**
  * Articles Model
@@ -86,7 +91,8 @@ class ArticlesTable extends Table
 
         $validator
             ->scalar('body')
-            ->allowEmptyString('body');
+            ->allowEmptyString('body')
+            ->minLength('body', 10);
 
         $validator
             ->boolean('published')
@@ -108,5 +114,14 @@ class ArticlesTable extends Table
         $rules->add($rules->existsIn('user_id', 'Users'), ['errorField' => 'user_id']);
 
         return $rules;
+    }
+
+    public function beforeSave(EventInterface $event, $entity, $options)
+    {
+        if ($entity->isNew() && !$entity->slug) {
+            $sluggedTitle = Text::slug($entity->title);
+            // スラグをスキーマで定義されている最大長に調整
+            $entity->slug = substr($sluggedTitle, 0, 191);
+        }
     }
 }
